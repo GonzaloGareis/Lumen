@@ -3,10 +3,8 @@
 import React, { useState, useEffect } from "react";
 import PatientCard from "@/components/patient-card";
 import AppointmentCard from "@/components/appointment-card";
-import {
-  CreatePatientModal,
-  CreateAppointmentModal,
-} from "@/components/dashboard/modals";
+import { CreateAppointmentModal } from "@/components/dashboard/modals/create-appointment-modal";
+import { CreatePatientModal } from "@/components/dashboard/modals/create-patient-modal";
 import { Input } from "@/components/ui/input";
 
 // temporary hardcoded appointments 
