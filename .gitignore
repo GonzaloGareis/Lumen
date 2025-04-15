@@ -39,3 +39,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# vscode settings
+.vscode/
+
+# local Supabase stuff
+.supabase/
+
+# Clerk dev session cache
+.clerk/
+
+# backup files
+*.bak
+
+# logs
+logs
+*.log
