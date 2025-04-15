@@ -1,4 +1,4 @@
-import { LandingNavbar } from "@/components/landing-navbar";
+import { LandingNavbar } from "@/components/landing/landing-navbar";
 
 const AcercaPage = () => {
   return (

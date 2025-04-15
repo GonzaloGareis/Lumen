@@ -1,4 +1,4 @@
-import { LandingNavbar } from "@/components/landing-navbar";
+import { LandingNavbar } from "@/components/landing/landing-navbar";
 import { LandingHero } from "@/components/landing-hero";
 import { Button } from "@/components/ui/button";
 import { Montserrat } from "next/font/google";
