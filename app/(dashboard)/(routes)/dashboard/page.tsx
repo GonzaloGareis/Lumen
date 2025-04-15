@@ -9,7 +9,7 @@ import {
 } from "@/components/dashboard/modals";
 import { Input } from "@/components/ui/input";
 
-// Hardcoded appointments remain for now
+// temporary hardcoded appointments 
 const turnos = [
   {
     id: 1,
@@ -43,7 +43,7 @@ const DashboardPage = () => {
   const [filteredTurnos, setFilteredTurnos] = useState(turnos);
   const [patients, setPatients] = useState<any[]>([]);
 
-  // Fetch patients from the database (via your GET API route)
+  // Fetch patients from the database
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -61,7 +61,7 @@ const DashboardPage = () => {
     fetchPatients();
   }, []);
 
-  // Filter patients by name based on search
+  // Filter patients by name (search bar input)
   const filteredPacientes = patients.filter((paciente) =>
     paciente.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
