@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
-// Optionally, import Clerk's SDK for proper token verification
+// Before production, import Clerk's SDK for proper token verification
 // import { verifyToken } from '@clerk/clerk-sdk-node';
 
 const SUPABASE_JWT_SECRET = process.env.SUPABASE_JWT_SECRET as string;
@@ -9,18 +9,17 @@ const SUPABASE_JWT_EXPIRATION = process.env.SUPABASE_JWT_EXPIRATION || '3600'; /
 
 export async function POST(request: Request): Promise<Response> {
   try {
-    // Parse the JSON body of the request
+    
     const { token } = await request.json();
 
     if (!token) {
       return NextResponse.json({ error: 'Clerk token is required.' }, { status: 400 });
     }
 
-    // Option A (Recommended for production):
+    //Recommended for production:
     // const verifiedToken = await verifyToken(token);
     // const clerkPayload = verifiedToken.payload;
 
-    // Option B (Simpler, for demonstration only):
     const clerkPayload = jwt.decode(token) as { sub?: string } | null;
     if (!clerkPayload || !clerkPayload.sub) {
       return NextResponse.json({ error: 'Invalid Clerk token.' }, { status: 400 });
@@ -29,19 +28,18 @@ export async function POST(request: Request): Promise<Response> {
     // Prepare the payload for the Supabase-compatible token
     const supabasePayload = {
       app_metadata: {
-        clerk_id: clerkPayload.sub   // your Clerk user id here
-        } , // Use the Clerk user ID as the subject
+        clerk_id: clerkPayload.sub   
+        } , //The clerk ID is being passed in the app_metadata optional claim, because passing it inside the sub claim, supabase doesn't read it unless it's UUID format
       role: 'authenticated', // Role expected by your RLS policies
-      exp: Math.floor(Date.now() / 1000) + 3600, // Expire in 1 hour
+      exp: Math.floor(Date.now() / 1000) + 3600,
     };
-
+    
     const supabaseToken = jwt.sign(supabasePayload, SUPABASE_JWT_SECRET, {
       audience: SUPABASE_JWT_AUDIENCE,
     });
-
-    console.log(supabaseToken)
     
     return NextResponse.json({ token: supabaseToken });
+    
   } catch (error) {
     console.error('Token exchange error:', error);
     return NextResponse.json(
