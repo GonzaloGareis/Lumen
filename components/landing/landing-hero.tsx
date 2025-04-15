@@ -3,7 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { Typewriter } from "react-simple-typewriter";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 export const LandingHero = () => {
   const { isSignedIn } = useAuth();
