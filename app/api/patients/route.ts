@@ -33,14 +33,34 @@ export async function GET(req: Request) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
   
-  // Use a token template (configure your Clerk dashboard accordingly)
-  const token = await getToken({ template: "supabase" });
-  if (!token) {
+  const clerkToken = await getToken({ template: "supabase" });
+  if (!clerkToken) {
     return new Response(JSON.stringify({ error: "No token found" }), { status: 401 });
   }
   
   try {
-    const data = await getPatientsByUserIdWithToken(userId, token);
+    // Derive the absolute URL dynamically from the incoming request
+    const host = req.headers.get("host");
+    // Choose protocol based on your environment: you can refine this logic as needed.
+    const protocol = host?.includes("localhost") ? "http" : "https";
+    const baseUrl = `${protocol}://${host}`;
+    const tokenExchangeUrl = `${baseUrl}/api/token`;
+
+    const exchangeResponse = await fetch(tokenExchangeUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: clerkToken }),
+      credentials: "include"
+    });
+
+    if (!exchangeResponse.ok) {
+      const err = await exchangeResponse.json();
+      throw new Error(err.error || "Token exchange failed");
+    }
+    
+    const { token: supabaseToken } = await exchangeResponse.json();
+    
+    const data = await getPatientsByUserIdWithToken(userId, supabaseToken);
     return NextResponse.json(data);
   } catch (error) {
     return new Response(
