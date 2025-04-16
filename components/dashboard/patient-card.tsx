@@ -1,16 +1,16 @@
 "use client";
 import React, { useState } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
-import EditPatientModal from "@/components/dashboard/edit-patient-modal";
+import EditPatientModal from "@/components/dashboard/modals/edit-patient-modal";
 
 interface PatientCardProps {
   paciente: {
-    id: number;
+    id: string;
     nombre: string;
-    edad: number;
-    contacto: string;
-    referente: string;
-    comentarios: string;
+    edad?: number;
+    contacto?: string;
+    referente?: string;
+    comentarios?: string;
   };
   onVerTurnos: (nombre: string) => void;
   isActive: boolean;
@@ -24,11 +24,13 @@ const PatientCard: React.FC<PatientCardProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="relative bg-white p-6 border rounded-lg shadow-md">
+    <div className="relative bg-white p-6 border rounded-lg shadow-md min-h-30">
       <div className="flex justify-between items-start">
         <div>
           <h3 className="text-xl font-semibold">{paciente.nombre}</h3>
-          <p className="text-sm">{paciente.edad} años</p>
+          {paciente.edad != null && (
+            <p className="text-sm">{paciente.edad} años</p>
+          )}
           <p className="text-sm">{paciente.contacto}</p>
           <p className="text-sm">{paciente.referente}</p>
           <p className="text-sm text-gray-500">{paciente.comentarios}</p>
@@ -52,7 +54,6 @@ const PatientCard: React.FC<PatientCardProps> = ({
         </button>
       </div>
 
-      {/* Edit Patient Modal */}
       {isModalOpen && (
         <EditPatientModal
           paciente={paciente}

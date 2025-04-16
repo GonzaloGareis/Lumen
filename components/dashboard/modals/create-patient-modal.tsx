@@ -15,41 +15,55 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const CreatePatientModal = () => {
-  // State for patient form fields
+  const [open, setOpen] = useState(false);
+
   const [nombre, setNombre] = useState("");
   const [edad, setEdad] = useState("");
   const [contacto, setContacto] = useState("");
   const [referente, setReferente] = useState("");
   const [comentarios, setComentarios] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleRegistrarPaciente = async () => {
-    const patientData = {
-      name: nombre,
-      age: edad ? Number(edad) : null,
-      contact: contacto,
-      family_reference: referente,
-      comments: comentarios,
-    };
+    setLoading(true);
 
-    const result = await fetch("/api/patients", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(patientData),
-    }).then((res) => res.json());
+    try {
+      const patientData = {
+        name: nombre,
+        age: edad ? Number(edad) : null,
+        contact: contacto,
+        family_reference: referente,
+        comments: comentarios,
+      };
 
-    if (result) {
-      // Clear the fields after successful creation
-      setNombre("");
-      setEdad("");
-      setContacto("");
-      setReferente("");
-      setComentarios("");
+      const res = await fetch("/api/patients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(patientData),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        console.error("Error creating patient:", result.error);
+      } else {
+        setEdad("");
+        setNombre("");
+        setContacto("");
+        setReferente("");
+        setComentarios("");
+        window.dispatchEvent(new CustomEvent("patientsUpdated"));
+        setOpen(false);
+      }
+    } catch (error) {
+      console.error("Error creating patient:", error);
     }
+    setLoading(false);
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           variant="outline"
@@ -116,7 +130,9 @@ export const CreatePatientModal = () => {
           </div>
         </div>
         <DialogFooter className="flex justify-end">
-          <Button onClick={handleRegistrarPaciente}>Registrar</Button>
+          <Button onClick={handleRegistrarPaciente} disabled={loading}>
+            Registrar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

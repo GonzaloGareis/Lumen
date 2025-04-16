@@ -10,9 +10,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 export interface Paciente {
-  id: number;
+  id: string;
   nombre: string;
   edad?: number;
   contacto?: string;
@@ -34,6 +35,64 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
   const [contacto, setContacto] = useState(paciente.contacto || "");
   const [referente, setReferente] = useState(paciente.referente || "");
   const [comentarios, setComentarios] = useState(paciente.comentarios || "");
+  const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
+
+  const handleUpdate = async () => {
+    setLoading(true);
+    try {
+      const body = {
+        name: nombre,
+        age: edad ? Number(edad) : null,
+        contact: contacto,
+        family_reference: referente,
+        comments: comentarios,
+      };
+
+      const res = await fetch(`/api/patients/${paciente.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Error updating patient:", errorData.error);
+      } else {
+        window.dispatchEvent(new CustomEvent("patientsUpdated"));
+        onClose();
+      }
+    } catch (error) {
+      console.error("Error updating patient:", error);
+    }
+    setLoading(false);
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("¿Estás seguro de eliminar este paciente?")) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/patients/${paciente.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Error deleting patient:", errorData.error);
+      } else {
+        window.dispatchEvent(new CustomEvent("patientsUpdated"));
+        onClose();
+      }
+    } catch (error) {
+      console.error("Error deleting patient:", error);
+    }
+    setLoading(false);
+  };
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -87,14 +146,17 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
           </div>
         </div>
         <DialogFooter className="flex justify-end space-x-2 mt-4">
-          {/* Red Eliminar button */}
           <Button
             variant="destructive"
             className="bg-red-600 hover:bg-red-700 text-white"
+            onClick={handleDelete}
+            disabled={loading}
           >
             Eliminar
           </Button>
-          <Button onClick={onClose}>Guardar</Button>
+          <Button onClick={handleUpdate} disabled={loading}>
+            Guardar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import PatientCard from "@/components/patient-card";
-import AppointmentCard from "@/components/appointment-card";
+import PatientCard from "@/components/dashboard/patient-card";
+import AppointmentCard from "@/components/dashboard/appointment-card";
 import { CreateAppointmentModal } from "@/components/dashboard/modals/create-appointment-modal";
 import { CreatePatientModal } from "@/components/dashboard/modals/create-patient-modal";
 import { Input } from "@/components/ui/input";
 
-// temporary hardcoded appointments 
+// temporary hardcoded appointments
 const turnos = [
   {
     id: 1,
@@ -41,22 +41,32 @@ const DashboardPage = () => {
   const [filteredTurnos, setFilteredTurnos] = useState(turnos);
   const [patients, setPatients] = useState<any[]>([]);
 
-  // Fetch patients from the database
-  useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const res = await fetch("/api/patients", { credentials: "include" });
-        if (!res.ok) {
-          console.error("Error fetching patients", res);
-          return;
-        }
-        const data = await res.json();
-        setPatients(data);
-      } catch (error) {
-        console.error("Error fetching patients", error);
+  const fetchPatients = async () => {
+    try {
+      const res = await fetch("/api/patients", { credentials: "include" });
+      if (!res.ok) {
+        console.error("Error fetching patients", res);
+        return;
       }
-    };
+      const data = await res.json();
+      setPatients(data);
+    } catch (error) {
+      console.error("Error fetching patients", error);
+    }
+  };
+
+  useEffect(() => {
+    // Initial fetch of patients.
     fetchPatients();
+
+    const handlePatientsUpdated = () => {
+      fetchPatients();
+    };
+
+    window.addEventListener("patientsUpdated", handlePatientsUpdated);
+    return () => {
+      window.removeEventListener("patientsUpdated", handlePatientsUpdated);
+    };
   }, []);
 
   // Filter patients by name (search bar input)
@@ -92,7 +102,6 @@ const DashboardPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F0F4FF] to-white p-14">
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Pacientes Section */}
         <section className="flex-1">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-semibold text-[#1E3A8A]">Pacientes</h2>
@@ -128,7 +137,6 @@ const DashboardPage = () => {
           </div>
         </section>
 
-        {/* Turnos Section */}
         <section className="flex-1">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-semibold text-[#1E3A8A]">Turnos</h2>

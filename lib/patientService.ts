@@ -1,8 +1,7 @@
 import { createClientWithToken } from "@/lib/supabaseClient";
 import { supabaseAdmin } from "@/lib/supabaseClient";
 
-// Define the expected types for patient and appointment records.
-// You can extend these interfaces to match your table schema precisely.
+
 export interface PatientData {
   user_id: string,
   name: string,
@@ -13,8 +12,45 @@ export interface PatientData {
   created_at: Date
 }
 
+export async function updatePatient(
+  patientId: string,
+  userId: string,
+  updateData: Partial<Omit<PatientData, 'created_at' | 'user_id'>>,
+  token: string
+) {
+  const client = createClientWithToken(token);
+  const { data, error } = await client
+    .from("patients")
+    .update(updateData)
+    .eq("id", patientId)
+    .eq("user_id", userId);
 
-// Creates a new patient record in the 'patients' table.
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}
+
+
+export async function deletePatient(
+  patientId: string,
+  userId: string,
+  token: string
+) {
+  const client = createClientWithToken(token);
+  const { data, error } = await client
+    .from("patients")
+    .delete()
+    .eq("id", patientId)
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}
+
+
 export async function createPatient(patientData: PatientData) {
   const { data, error } = await supabaseAdmin
     .from("patients")
@@ -24,7 +60,6 @@ export async function createPatient(patientData: PatientData) {
   if (error) {
     return { error: error.message };
   }
-
   return data;
 }
 
