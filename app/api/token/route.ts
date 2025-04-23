@@ -29,8 +29,8 @@ export async function POST(request: Request): Promise<Response> {
     const supabasePayload = {
       app_metadata: {
         clerk_id: clerkPayload.sub   
-        } , //The clerk ID is being passed in the app_metadata optional claim, because passing it inside the sub claim, supabase doesn't read it unless it's UUID format
-      role: 'authenticated', // Role expected by your RLS policies
+        } , //The clerk ID is being passed in the app_metadata optional claim, because if it's passed inside the sub claim, supabase doesn't read it unless it's UUID format
+      role: 'authenticated', // Role expected by RLS policies
       exp: Math.floor(Date.now() / 1000) + 3600,
     };
     

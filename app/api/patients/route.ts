@@ -2,10 +2,12 @@ import { NextResponse } from 'next/server';
 import { createPatientWithToken } from '@/lib/patientService';
 import { auth } from '@clerk/nextjs/server';
 import { getPatientsByUserIdWithToken } from "@/lib/patientService";
+import { exchangeToken } from '@/lib/tokenService';
 
 
 export async function POST(req: Request) {
 
+  // Passing the cookie header so Clerk can properly extract the session. Even tho it's not used clerk reads it by context
   const cookie = req.headers.get("cookie") || "";
   const { userId, getToken } = await auth();
 
@@ -19,29 +21,15 @@ export async function POST(req: Request) {
   }
   
   const body = await req.json();
-  console.log(body);
 
   try {
-    // Derive the absolute URL dynamically from the incoming request
+
     const host = req.headers.get("host");
-    // Choose protocol based on environment
-    const protocol = host?.includes("localhost") ? "http" : "https";
-    const baseUrl = `${protocol}://${host}`;
-    const tokenExchangeUrl = `${baseUrl}/api/token`;
-
-    const exchangeResponse = await fetch(tokenExchangeUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: clerkToken }),
-      credentials: "include"
-    });
-
-    if (!exchangeResponse.ok) {
-      const err = await exchangeResponse.json();
-      throw new Error(err.error || "Token exchange failed");
+    if (!host) {
+      throw new Error("Missing host header");
     }
-    
-    const { token: supabaseToken } = await exchangeResponse.json();
+
+    const { token: supabaseToken } = await exchangeToken(host, clerkToken);
     
     const result = await createPatientWithToken(body, userId, supabaseToken)
     return NextResponse.json(result);
@@ -56,7 +44,7 @@ export async function POST(req: Request) {
 
 
 export async function GET(req: Request) {
-  // Pass the cookie header so Clerk can properly extract the session
+  
   const cookie = req.headers.get("cookie") || "";
   const { userId, getToken } = await auth();
   
@@ -70,29 +58,17 @@ export async function GET(req: Request) {
   }
   
   try {
-    // Derive the absolute URL dynamically from the incoming request
+
     const host = req.headers.get("host");
-    // Choose protocol based on environment
-    const protocol = host?.includes("localhost") ? "http" : "https";
-    const baseUrl = `${protocol}://${host}`;
-    const tokenExchangeUrl = `${baseUrl}/api/token`;
-
-    const exchangeResponse = await fetch(tokenExchangeUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: clerkToken }),
-      credentials: "include"
-    });
-
-    if (!exchangeResponse.ok) {
-      const err = await exchangeResponse.json();
-      throw new Error(err.error || "Token exchange failed");
+    if (!host) {
+      throw new Error("Missing host header");
     }
-    
-    const { token: supabaseToken } = await exchangeResponse.json();
+
+    const { token: supabaseToken } = await exchangeToken(host, clerkToken);
     
     const data = await getPatientsByUserIdWithToken(userId, supabaseToken);
     return NextResponse.json(data);
+
   } catch (error) {
     return new Response(
       JSON.stringify({ error: (error as Error).message }),

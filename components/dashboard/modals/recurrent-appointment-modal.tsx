@@ -55,7 +55,7 @@ export const RecurrenceModal: React.FC<RecurrenceModalProps> = ({
   const [endOption, setEndOption] = useState(settings.endOption);
   const [endDate, setEndDate] = useState(settings.endDate || "");
   const [occurrenceCount, setOccurrenceCount] = useState(
-    settings.occurrenceCount ?? 1
+    settings.occurrenceCount ?? 2
   );
 
   // whenever modal opens, copy in the parent's saved settings
@@ -65,7 +65,7 @@ export const RecurrenceModal: React.FC<RecurrenceModalProps> = ({
       setFrequency(settings.frequency);
       setEndOption(settings.endOption);
       setEndDate(settings.endDate || "");
-      setOccurrenceCount(settings.occurrenceCount ?? 1);
+      setOccurrenceCount(settings.occurrenceCount ?? 2);
 
       // if parent has no weekdays yet, default to initialDate day
       if (settings.weekdays.length > 0) {
@@ -134,7 +134,6 @@ export const RecurrenceModal: React.FC<RecurrenceModalProps> = ({
             </select>
           </div>
 
-          {/* Weekday toggles */}
           {frequency === "week" && (
             <div className="space-y-1">
               <Label>Repetir los</Label>
@@ -157,7 +156,6 @@ export const RecurrenceModal: React.FC<RecurrenceModalProps> = ({
             </div>
           )}
 
-          {/* End condition */}
           <div className="space-y-2">
             <Label>Finaliza</Label>
             <RadioGroup
@@ -188,10 +186,10 @@ export const RecurrenceModal: React.FC<RecurrenceModalProps> = ({
                 <Input
                   type="number"
                   disabled={endOption !== "afterCount"}
-                  min={1}
+                  min={2}
                   value={occurrenceCount}
                   onChange={(e) =>
-                    setOccurrenceCount(parseInt(e.target.value, 10) || 1)
+                    setOccurrenceCount(parseInt(e.target.value, 10) || 2)
                   }
                   className="w-20"
                 />

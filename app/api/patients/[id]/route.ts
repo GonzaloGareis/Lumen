@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { updatePatient, deletePatient } from '@/lib/patientService';
 import { auth } from '@clerk/nextjs/server';
+import { exchangeToken } from '@/lib/tokenService';
 
 export async function PUT(
   req: Request,
@@ -27,23 +28,13 @@ export async function PUT(
   }
   
   try {
+
     const host = req.headers.get("host");
-    const protocol = host?.includes("localhost") ? "http" : "https";
-    const tokenExchangeUrl = `${protocol}://${host}/api/token`;
-    
-    const exchangeResponse = await fetch(tokenExchangeUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: clerkToken }),
-      credentials: "include"
-    });
-    
-    if (!exchangeResponse.ok) {
-      const err = await exchangeResponse.json();
-      throw new Error(err.error || "Token exchange failed");
+    if (!host) {
+      throw new Error("Missing host header");
     }
-    
-    const { token: supabaseToken } = await exchangeResponse.json();
+
+    const { token: supabaseToken } = await exchangeToken(host, clerkToken);
     
     const data = await updatePatient(params.id, userId, updateData, supabaseToken);
     return NextResponse.json(data);
@@ -74,24 +65,13 @@ export async function DELETE(
   }
   
   try {
+
     const host = req.headers.get("host");
-    const protocol = host?.includes("localhost") ? "http" : "https";
-    const tokenExchangeUrl = `${protocol}://${host}/api/token`;
-    
-    const exchangeResponse = await fetch(tokenExchangeUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: clerkToken }),
-      credentials: "include"
-    });
-    
-    if (!exchangeResponse.ok) {
-      const err = await exchangeResponse.json();
-      throw new Error(err.error || "Token exchange failed");
+    if (!host) {
+      throw new Error("Missing host header");
     }
-    
-    const { token: supabaseToken } = await exchangeResponse.json();
-    
+
+    const { token: supabaseToken } = await exchangeToken(host, clerkToken);
     
     const data = await deletePatient(params.id, userId, supabaseToken);
     return NextResponse.json(data);
