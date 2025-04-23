@@ -11,46 +11,48 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
-export interface Turno {
-  id: number;
-  paciente: string;
-  fecha: string;
-  hora: string;
-  notas?: string;
-}
+import { AppointmentWithPatient } from "@/lib/appointmentService";
 
 interface AppointmentCardProps {
-  turno: Turno;
+  appointmentData: AppointmentWithPatient;
 }
 
-// Helper function to format date as 'Dia de la semana DD/MM/YYYY'
-const formatDate = (dateString: string): string => {
-  const daysOfWeek = [
-    "Domingo",
-    "Lunes",
-    "Martes",
-    "Miércoles",
-    "Jueves",
-    "Viernes",
-    "Sábado",
-  ];
-  const date = new Date(dateString);
+const daysOfWeek = [
+  "Domingo",
+  "Lunes",
+  "Martes",
+  "Miércoles",
+  "Jueves",
+  "Viernes",
+  "Sábado",
+];
+
+function formatDate(date: Date): string {
   const dayOfWeek = daysOfWeek[date.getDay()];
   const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+  const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
-
   return `${dayOfWeek} ${day}/${month}/${year}`;
-};
+}
 
-const AppointmentCard: React.FC<AppointmentCardProps> = ({ turno }) => {
-  const [notes, setNotes] = useState(turno.notas || "");
+function formatTime(date: Date): string {
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+}
+
+const AppointmentCard: React.FC<AppointmentCardProps> = ({
+  appointmentData,
+}) => {
+  const [notes, setNotes] = useState(appointmentData.notes ?? "");
+  const dateObj = new Date(appointmentData.date);
+  const formattedDate = formatDate(dateObj);
+  const formattedTime = formatTime(dateObj);
 
   return (
     <Card>
       <CardHeader className="flex justify-between items-center">
-        <CardTitle>{turno.paciente}</CardTitle>
+        <CardTitle>{appointmentData.patient_name}</CardTitle>
         <Dialog>
           <DialogTrigger asChild>
             <Button
@@ -63,7 +65,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ turno }) => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {turno.paciente} - {formatDate(turno.fecha)}
+                {appointmentData.patient_name} – {formattedDate}
               </DialogTitle>
             </DialogHeader>
             <div className="mt-4">
@@ -82,10 +84,10 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ turno }) => {
       </CardHeader>
       <CardContent>
         <p>
-          <strong>Fecha:</strong> {formatDate(turno.fecha)}
+          <strong>Fecha:</strong> {formattedDate}
         </p>
         <p>
-          <strong>Hora:</strong> {turno.hora}
+          <strong>Hora:</strong> {formattedTime}
         </p>
       </CardContent>
     </Card>

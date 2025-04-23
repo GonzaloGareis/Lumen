@@ -6,40 +6,17 @@ import AppointmentCard from "@/components/dashboard/appointment-card";
 import { CreateAppointmentModal } from "@/components/dashboard/modals/create-appointment-modal";
 import { CreatePatientModal } from "@/components/dashboard/modals/create-patient-modal";
 import { Input } from "@/components/ui/input";
-
-// temporary hardcoded appointments
-const turnos = [
-  {
-    id: 1,
-    paciente: "Juan Perez",
-    fecha: "2025-04-15",
-    hora: "10:00",
-  },
-  {
-    id: 2,
-    paciente: "Ana Gómez",
-    fecha: "2025-04-14",
-    hora: "11:30",
-  },
-  {
-    id: 3,
-    paciente: "Juan Perez",
-    fecha: "2025-04-12",
-    hora: "08:00",
-  },
-  {
-    id: 4,
-    paciente: "Ana Gómez",
-    fecha: "2025-04-10",
-    hora: "09:00",
-  },
-];
+import { AppointmentWithPatient } from "@/lib/appointmentService";
 
 const DashboardPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<string>("");
-  const [filteredTurnos, setFilteredTurnos] = useState(turnos);
   const [patients, setPatients] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<AppointmentWithPatient[]>(
+    []
+  );
+  const [filteredAppointments, setFilteredAppointments] =
+    useState(appointments);
 
   const fetchPatients = async () => {
     try {
@@ -55,9 +32,24 @@ const DashboardPage = () => {
     }
   };
 
+  const fetchAppointments = async () => {
+    try {
+      const res = await fetch("/api/appointments", { credentials: "include" });
+      if (!res.ok) {
+        console.error("Error fetching appointments", res);
+        return;
+      }
+      const data: AppointmentWithPatient[] = await res.json();
+      setAppointments(data);
+    } catch (error) {
+      console.error("Error fetching appointments", error);
+    }
+  };
+
   useEffect(() => {
-    // Initial fetch of patients.
+    // Initial fetch of patients and appointments.
     fetchPatients();
+    fetchAppointments();
 
     const handlePatientsUpdated = () => {
       fetchPatients();
@@ -70,7 +62,7 @@ const DashboardPage = () => {
   }, []);
 
   // Filter patients by name (search bar input)
-  const filteredPacientes = patients.filter((paciente) =>
+  const filteredPatients = patients.filter((paciente) =>
     paciente.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -78,25 +70,25 @@ const DashboardPage = () => {
   const onVerTurnos = (nombre: string) => {
     if (selectedPatient === nombre) {
       setSelectedPatient("");
-      setFilteredTurnos(turnos);
+      setFilteredAppointments(appointments);
     } else {
       setSelectedPatient(nombre);
-      const patientAppointments = turnos.filter(
-        (turno) => turno.paciente === nombre
+      const patientAppointments = appointments.filter(
+        (appointment) => appointment.patient_name === nombre
       );
-      setFilteredTurnos(
+      setFilteredAppointments(
         patientAppointments.sort(
-          (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
         )
       );
     }
   };
 
-  const displayedTurnos =
+  const displayedAppointments =
     selectedPatient !== ""
-      ? filteredTurnos
-      : [...turnos].sort(
-          (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+      ? filteredAppointments
+      : [...appointments].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
         );
 
   return (
@@ -115,8 +107,8 @@ const DashboardPage = () => {
           />
 
           <div className="space-y-4">
-            {filteredPacientes.length > 0 ? (
-              filteredPacientes.map((paciente) => (
+            {filteredPatients.length > 0 ? (
+              filteredPatients.map((paciente) => (
                 <PatientCard
                   key={paciente.id}
                   paciente={{
@@ -138,15 +130,18 @@ const DashboardPage = () => {
         </section>
 
         <section className="flex-1">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-19">
             <h2 className="text-2xl font-semibold text-[#1E3A8A]">Turnos</h2>
-            <CreateAppointmentModal />
+            <CreateAppointmentModal patients={patients} />
           </div>
 
           <div className="space-y-4">
-            {displayedTurnos.length > 0 ? (
-              displayedTurnos.map((turno) => (
-                <AppointmentCard key={turno.id} turno={turno} />
+            {displayedAppointments.length > 0 ? (
+              displayedAppointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.id}
+                  appointmentData={appointment}
+                />
               ))
             ) : (
               <p className="text-gray-500">No se encontraron turnos.</p>

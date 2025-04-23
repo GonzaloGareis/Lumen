@@ -1,11 +1,20 @@
-import { supabaseAdmin } from "@/lib/supabaseClient";
+import { createClientWithToken, supabaseAdmin } from "@/lib/supabaseClient";
+import { UUID } from "crypto";
 
 
 export interface AppointmentData {
     user_id: string;
+    patient_id: UUID;
     date: Date,
     notes: string,
-    created_at: Date
+  }
+
+  export interface AppointmentWithPatient {
+    id: string;
+    patient_id: string;
+    date: string;
+    notes: string | null;  
+    patient_name: string;
   }
 
 
@@ -23,4 +32,40 @@ export async function createAppointment(appointmentData: AppointmentData) {
     }
   
     return data;
+  }
+
+
+  export async function getAppointmentsByUserIdWithToken(
+    userId: string,
+    token: string
+  ): Promise<AppointmentWithPatient[]> {
+
+    const client = createClientWithToken(token);
+  
+    // Select all appointment fields + the patient's name from patients table
+    const { data, error } = await client
+      .from("appointments")
+      .select(`
+        id,
+        patient_id,
+        date,
+        notes,
+        patients (
+          name
+        )
+      `)
+      .eq("user_id", userId);
+  
+    if (error) {
+      throw new Error(error.message);
+    }
+  
+    // Flatten the nested patients.name into patient_name
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      patient_id: row.patient_id,
+      date: row.date,
+      notes: row.notes,
+      patient_name: row.patients.name,
+    }));
   }

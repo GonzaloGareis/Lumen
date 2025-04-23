@@ -18,6 +18,7 @@ export async function updatePatient(
   updateData: Partial<Omit<PatientData, 'created_at' | 'user_id'>>,
   token: string
 ) {
+  
   const client = createClientWithToken(token);
   const { data, error } = await client
     .from("patients")

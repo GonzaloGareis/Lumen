@@ -41,7 +41,7 @@ export async function GET(req: Request) {
   try {
     // Derive the absolute URL dynamically from the incoming request
     const host = req.headers.get("host");
-    // Choose protocol based on your environment: you can refine this logic as needed.
+    // Choose protocol based on environment
     const protocol = host?.includes("localhost") ? "http" : "https";
     const baseUrl = `${protocol}://${host}`;
     const tokenExchangeUrl = `${baseUrl}/api/token`;
