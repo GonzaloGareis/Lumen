@@ -1,26 +1,57 @@
 import { NextResponse } from 'next/server';
-import { createPatient } from '@/lib/patientService';
+import { createPatientWithToken } from '@/lib/patientService';
 import { auth } from '@clerk/nextjs/server';
 import { getPatientsByUserIdWithToken } from "@/lib/patientService";
+
 
 export async function POST(req: Request) {
 
   const cookie = req.headers.get("cookie") || "";
-  const { userId } = await auth();
+  const { userId, getToken } = await auth();
 
   if (!userId) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
-
+  const clerkToken = await getToken({ template: "supabase" });
+  if (!clerkToken) {
+    return new Response(JSON.stringify({ error: "No token found" }), { status: 401 });
+  }
+  
   const body = await req.json();
+  console.log(body);
 
-  const result = await createPatient({
-    ...body,
-    user_id: userId, // Inject user_id securely
-  });
+  try {
+    // Derive the absolute URL dynamically from the incoming request
+    const host = req.headers.get("host");
+    // Choose protocol based on environment
+    const protocol = host?.includes("localhost") ? "http" : "https";
+    const baseUrl = `${protocol}://${host}`;
+    const tokenExchangeUrl = `${baseUrl}/api/token`;
 
-  return NextResponse.json(result);
+    const exchangeResponse = await fetch(tokenExchangeUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: clerkToken }),
+      credentials: "include"
+    });
+
+    if (!exchangeResponse.ok) {
+      const err = await exchangeResponse.json();
+      throw new Error(err.error || "Token exchange failed");
+    }
+    
+    const { token: supabaseToken } = await exchangeResponse.json();
+    
+    const result = await createPatientWithToken(body, userId, supabaseToken)
+    return NextResponse.json(result);
+
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: (error as Error).message }),
+      { status: 500 }
+    );
+  }
 }
 
 

@@ -1,9 +1,7 @@
 import { createClientWithToken } from "@/lib/supabaseClient";
-import { supabaseAdmin } from "@/lib/supabaseClient";
 
 
 export interface PatientData {
-  user_id: string,
   name: string,
   age: number,
   contact: string,
@@ -52,10 +50,16 @@ export async function deletePatient(
 }
 
 
-export async function createPatient(patientData: PatientData) {
-  const { data, error } = await supabaseAdmin
+export async function createPatientWithToken(
+  patientData: PatientData, 
+  userId: string, 
+  token: string
+) {
+
+  const client = createClientWithToken(token);
+  const { data, error } = await client
     .from("patients")
-    .insert([patientData])
+    .insert([{user_id: userId, ...patientData}])
     .single();
 
   if (error) {
