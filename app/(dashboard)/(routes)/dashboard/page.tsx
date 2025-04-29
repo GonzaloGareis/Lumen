@@ -47,17 +47,16 @@ const DashboardPage = () => {
   };
 
   useEffect(() => {
-    // Initial fetch of patients and appointments.
+    // Initial fetch of patients and appointments
     fetchPatients();
     fetchAppointments();
 
-    const handlePatientsUpdated = () => {
-      fetchPatients();
-    };
+    window.addEventListener("patientsUpdated", fetchPatients);
+    window.addEventListener("appointmentsUpdated", fetchAppointments);
 
-    window.addEventListener("patientsUpdated", handlePatientsUpdated);
     return () => {
-      window.removeEventListener("patientsUpdated", handlePatientsUpdated);
+      window.removeEventListener("patientsUpdated", fetchPatients);
+      window.removeEventListener("appointmentsUpdated", fetchAppointments);
     };
   }, []);
 

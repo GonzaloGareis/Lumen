@@ -22,23 +22,18 @@ export async function POST(req: Request) {
   
   const body = await req.json();
 
+  const host = req.headers.get("host");
+  if (!host) {
+    throw new Error("Missing host header");
+  }
+
   try {
-
-    const host = req.headers.get("host");
-    if (!host) {
-      throw new Error("Missing host header");
-    }
-
-    const { token: supabaseToken } = await exchangeToken(host, clerkToken);
-    
+    const supabaseToken = await exchangeToken(host, clerkToken);    
     const result = await createPatientWithToken(body, userId, supabaseToken)
     return NextResponse.json(result);
-
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ error: (error as Error).message }),
-      { status: 500 }
-    );
+    
+  } catch (err) {
+    return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500 });
   }
 }
 
@@ -57,22 +52,17 @@ export async function GET(req: Request) {
     return new Response(JSON.stringify({ error: "No token found" }), { status: 401 });
   }
   
-  try {
-
     const host = req.headers.get("host");
     if (!host) {
       throw new Error("Missing host header");
     }
 
-    const { token: supabaseToken } = await exchangeToken(host, clerkToken);
-    
-    const data = await getPatientsByUserIdWithToken(userId, supabaseToken);
-    return NextResponse.json(data);
+    try {
+      const supabaseToken = await exchangeToken(host, clerkToken);
+      const data = await getPatientsByUserIdWithToken(userId, supabaseToken);
+      return NextResponse.json(data);
 
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ error: (error as Error).message }),
-      { status: 500 }
-    );
-  }
+    } catch (err) {
+      return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500 });
+    }
 }

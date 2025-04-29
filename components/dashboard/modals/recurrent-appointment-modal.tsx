@@ -79,11 +79,16 @@ export const RecurrenceModal: React.FC<RecurrenceModalProps> = ({
   // prevent deselecting all when weekly
   const handleWeekdaysChange = (vals: string[]) => {
     const days = vals.map((v) => parseInt(v, 10));
-    if (frequency === "week" && days.length === 0) return;
+    if (
+      (frequency === "week" && days.length === 0) ||
+      !days.includes(initialDate.getDay())
+    )
+      return;
     setWeekdays(days);
   };
 
   const handleSave = () => {
+    weekdays.sort();
     onSave({
       interval,
       frequency,

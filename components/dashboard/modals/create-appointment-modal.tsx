@@ -118,31 +118,31 @@ export const CreateAppointmentModal: React.FC<CreateAppointmentModalProps> = ({
         body.recurrence = recurrenceSettings;
       }
 
-      //   const res = await fetch("/api/appointments", {
-      //     method: "POST",
-      //     headers: { "Content-Type": "application/json" },
-      //     credentials: "include",
-      //     body: JSON.stringify(body),
-      //   });
+      const res = await fetch("/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+      });
 
-      //   if (!res.ok) {
-      //     const err = await res.json();
-      //     console.error("Error creando turno:", err.error);
-      //     alert("No se pudo crear el turno.");
-      //   } else {
-      //     window.dispatchEvent(new CustomEvent("appointmentsUpdated"));
-      //     // reset form
-      //     setPatientId("");
-      //     setFecha("");
-      //     setHora("");
-      //     setUseRecurrence(false);
-      //     setRecurrenceSettings({
-      //       interval: 1,
-      //       frequency: "week",
-      //       weekdays: [],
-      //       endOption: "never",
-      //     });
-      //   }
+      if (!res.ok) {
+        const err = await res.json();
+        console.error("Error creando turno:", err.error);
+        alert("No se pudo crear el turno.");
+      } else {
+        window.dispatchEvent(new CustomEvent("appointmentsUpdated"));
+        // reset form
+        setPatientId("");
+        setFecha("");
+        setHora("");
+        setUseRecurrence(false);
+        setRecurrenceSettings({
+          interval: 1,
+          frequency: "week",
+          weekdays: [],
+          endOption: "never",
+        });
+      }
     } catch (err) {
       console.error(err);
       alert("Ocurrió un error inesperado.");
