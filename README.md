@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LUMEN — Medical Appointment Scheduling App
 
-## Getting Started
+**Lumen** is a full-stack web application for managing medical appointments, including support for recurring bookings. Built for clinics and solo practitioners, it streamlines the process of creating, viewing, and managing patient schedules.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+-  Create, edit, and delete appointments
+-  Support for weekly/monthly recurring appointments with custom patterns
+-  Patient management (create, list, update, delete)
+-  Secure authentication using Clerk
+-  Fully responsive and user-friendly UI
+-  Real-time updates with event listeners
+-  PostgreSQL database with Supabase
+-  Deployed and API-ready
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Frontend:** React, TypeScript, Tailwind CSS
+- **Backend:** Next.js 14 (App Router), API Routes
+- **Database:** Supabase (PostgreSQL)
+- **Auth:** Clerk
+- **Hosting:** Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Testing
+TBD — Current testing is manual. Automated test coverage is planned in future versions.
 
-## Learn More
+# Deployment
+This app is soon to be production-ready. Deployment is planned on Vercel.
 
-To learn more about Next.js, take a look at the following resources:
+# Future implementations:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+ Email and msg reminders
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+ Mobile support
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+ Calendar view (week/month)
